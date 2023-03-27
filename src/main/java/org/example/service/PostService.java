@@ -2,10 +2,12 @@ package org.example.service;
 
 import org.example.exception.NotFoundException;
 import org.example.model.Post;
+import org.example.model.PostDTO;
 import org.example.repository.PostRepositoryStubImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -15,20 +17,35 @@ public class PostService {
         this.repository = repository;
     }
     
-    public List<Post> all() {
-        return repository.all();
+    public List<PostDTO> all() {
+        return repository.all()
+                .stream()
+                .filter(post -> !post.isRemoved())
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
     
-    public Post getById(long id) {
-        return repository.getById(id).orElseThrow(NotFoundException::new);
+    public PostDTO getById(long id) {
+        return repository.getById(id)
+                .filter(post -> !post.isRemoved())
+                .map(this::convertToDTO)
+                .orElseThrow(NotFoundException::new);
     }
     
-    public Post save(Post post) {
-        return repository.save(post);
+    public PostDTO save(Post post) {
+        if (post.isRemoved()) {
+            throw new NotFoundException("NOT FOUND");
+        }
+        return convertToDTO(repository.save(post));
     }
     
     public void removeById(long id) {
-        repository.removeById(id);
+        Post post = repository.getById(id).orElseThrow(NotFoundException::new);
+        post.setRemoved(true);
+    }
+    
+    private PostDTO convertToDTO(Post post) {
+        return new PostDTO(post.getId(), post.getContent());
     }
 }
 

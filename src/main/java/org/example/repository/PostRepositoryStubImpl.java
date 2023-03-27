@@ -20,7 +20,7 @@ public class PostRepositoryStubImpl implements PostRepository {
     }
     
     public Optional<Post> getById(long id) {
-        return Optional.of(postsMap.get(id));
+        return Optional.ofNullable(postsMap.get(id));
     }
     
     public Post save(Post post) {

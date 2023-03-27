@@ -2,6 +2,7 @@ package org.example.controller;
 
 import com.google.gson.Gson;
 import org.example.model.Post;
+import org.example.model.PostDTO;
 import org.example.service.PostService;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,17 +21,17 @@ public class PostController {
     }
     
     @GetMapping
-    public List<Post> all() {
+    public List<PostDTO> all() {
         return service.all();
     }
     
     @GetMapping("/{id}")
-    public Post getById(@PathVariable long id) {
+    public PostDTO getById(@PathVariable long id) {
         return service.getById(id);
     }
     
     @PostMapping
-    public Post save(@RequestBody Post post) {
+    public PostDTO save(@RequestBody Post post) {
         return service.save(post);
     }
     
