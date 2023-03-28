@@ -1,5 +1,6 @@
 package org.example.repository;
 
+import org.example.exception.NotFoundException;
 import org.example.model.Post;
 import org.springframework.stereotype.Repository;
 
@@ -8,6 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 // Stub
 @Repository
@@ -16,14 +18,20 @@ public class PostRepositoryStubImpl implements PostRepository {
     public AtomicLong counter = new AtomicLong();
     
     public List<Post> all() {
-        return postsMap.values().stream().toList();
+        return postsMap.values().stream()
+                .filter(post -> !post.isRemoved())
+                .collect(Collectors.toList());
     }
     
     public Optional<Post> getById(long id) {
-        return Optional.ofNullable(postsMap.get(id));
+        Optional<Post> post = Optional.ofNullable(postsMap.get(id));
+        return post.filter(post1 -> !post1.isRemoved());
     }
     
     public Post save(Post post) {
+        if (post.isRemoved()) {
+            throw new NotFoundException("NOT FOUND");
+        }
         if (post.getId() == 0) {
             postsMap.put(counter.incrementAndGet(), post);
             post.setId(counter.get());
@@ -39,6 +47,6 @@ public class PostRepositoryStubImpl implements PostRepository {
     }
     
     public void removeById(long id) {
-        postsMap.remove(id);
+        postsMap.get(id).setRemoved(true);
     }
 }

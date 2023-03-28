@@ -20,32 +20,30 @@ public class PostService {
     public List<PostDTO> all() {
         return repository.all()
                 .stream()
-                .filter(post -> !post.isRemoved())
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
     
     public PostDTO getById(long id) {
         return repository.getById(id)
-                .filter(post -> !post.isRemoved())
                 .map(this::convertToDTO)
                 .orElseThrow(NotFoundException::new);
     }
     
-    public PostDTO save(Post post) {
-        if (post.isRemoved()) {
-            throw new NotFoundException("NOT FOUND");
-        }
-        return convertToDTO(repository.save(post));
+    public PostDTO save(PostDTO post) {
+        return convertToDTO(repository.save(convertToEntity(post)));
     }
     
     public void removeById(long id) {
-        Post post = repository.getById(id).orElseThrow(NotFoundException::new);
-        post.setRemoved(true);
+       repository.getById(id);
     }
     
     private PostDTO convertToDTO(Post post) {
         return new PostDTO(post.getId(), post.getContent());
+    }
+    
+    private Post convertToEntity(PostDTO postDTO) {
+        return new Post(postDTO.getId(), postDTO.getContent());
     }
 }
 
