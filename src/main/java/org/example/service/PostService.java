@@ -35,7 +35,7 @@ public class PostService {
     }
     
     public void removeById(long id) {
-       repository.getById(id);
+       repository.removeById(id);
     }
     
     private PostDTO convertToDTO(Post post) {
